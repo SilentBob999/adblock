@@ -126,9 +126,8 @@ nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 	cat "$time" >$CIFS/$LAST
 	cat "$time" >/tmp/$LAST
 	} || {
-	# Always download if cannot know if updated
-	elog "Source do not provide time - adding S$i to download"
-	DLList="$DLList $i"
+	# no timestamp, gen if no url (local host) or always download if remote host
+	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && GenOnly="$GenOnly $i" || DLList="$DLList $i"
 	}
 done
 [ -n "$UpToDate" -a -n "$DLList" ] && DLList="$DLList $UpToDate"
