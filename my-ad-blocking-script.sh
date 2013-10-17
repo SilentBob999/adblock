@@ -1,30 +1,25 @@
 #!/bin/sh
 ## Tomato AD-Blocking script
 ## https://github.com/SilentBob999/adblock
-##
+
 alias elog='logger -t ADBLOCK -s'
 Running="/tmp/adblock" #leave this in /tmp
 
-##
-## variables
 REDIRECTIP="0.0.0.0"
 CIFS="/cifs1/dnsmasq" # adapt to your need
 LocalHost="$CIFS/HOST-S\$i"
 [ -d $CIFS ] && TMP="$CIFS/tmp" || TMP="/tmp/tmp"
 [ -d $CIFS ] && GEN="$CIFS/gen" || GEN="/tmp/gen"
 
-
-## remove/whitelist websites
 WHITELIST="facebook.com dropbox.com"
 
-## Sources
 GETS="1 2 3 4 6 7"
 S1="http://pgl.yoyo.org/as/serverlist.php?hostformat=nohtml"  ##44K - 2,539 hosts
 S2="http://mirror1.malwaredomains.com/files/justdomains" ##474K - 23,972 hosts
 S3="http://www.malwaredomainlist.com/hostslist/hosts.txt" ##52K - 1,661 hosts
 S4="http://winhelp2002.mvps.org/hosts.txt" ##560K - approx 15,350 hosts
-S5="http://hosts-file.net/download/hosts.txt" #7,873K - 246,284 hosts - by Malwarebytes Corp
-S6="http://hosts-file.net/hphosts-partial.asp" #2,719K - 77,661 hosts - by Malwarebytes Corp
+S5="http://hosts-file.net/download/hosts.txt" #7,873K - 246,284 hosts
+S6="http://hosts-file.net/hphosts-partial.asp" #2,719K - 77,661 hosts
 S7="http://hostsfile.mine.nu/Hosts" ##2,910K - 94,926 hosts
 S8="http://adblock.mahakala.is/hosts" ##10,528K  330,332 hosts
 
@@ -98,7 +93,7 @@ local LAST=S$i.last
 eval LocalFile="$LocalHost"
 unset LASTF time
 [ -f "/tmp/$LAST" ] && LASTF=/tmp/$LAST
-[ -f "$CIFS/$LAST" ] && LASTF=$CIFS/$LAST  # priority to CIFS to keep local copy up to date
+[ -f "$CIFS/$LAST" ] && LASTF=$CIFS/$LAST
 P1=$(echo $url| sed 's|^http[s]*://[^/]*\(/.*\)$|\1|')
 H1=$(echo $url| sed 's|^http[s]*://\([^/]*\)/.*$|\1|')
 time=$(echo -e "HEAD $P1 HTTP/1.1\r\nHost: $H1\r\nConnection: close\r\n"|
