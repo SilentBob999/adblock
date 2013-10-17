@@ -115,8 +115,7 @@ nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 	cat "$time" >$CIFS/$LAST
 	cat "$time" >/tmp/$LAST
 	} || {
-	elog "Source do not provide time - adding S$i to download"
-	DLList="$DLList $i"
+	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && GenOnly="$GenOnly $i" || DLList="$DLList $i"
 	}
 done
 [ -n "$UpToDate" -a -n "$DLList" ] && DLList="$DLList $UpToDate"
