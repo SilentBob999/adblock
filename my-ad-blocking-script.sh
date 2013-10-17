@@ -8,7 +8,7 @@ Running="/tmp/adblock" #leave this in /tmp
 ##
 ## variables
 REDIRECTIP="0.0.0.0"
-CIFS="/cifs1/dnsmasq" # adapt to your need - no space - DONT USE JFFS
+CIFS="/cifs1/dnsmasq" # adapt to your need
 LocalHost="$CIFS/HOST-S\$i"
 [ -d $CIFS ] && TMP="$CIFS/tmp" || TMP="/tmp/tmp"
 [ -d $CIFS ] && GEN="$CIFS/gen" || GEN="/tmp/gen"
@@ -18,7 +18,6 @@ LocalHost="$CIFS/HOST-S\$i"
 WHITELIST="facebook.com dropbox.com"
 
 ## Sources
-## Warning ( ( HUGE : S5 , S8 ) ( BIG : S6 , S7 ) )
 GETS="1 2 3 4 6 7"
 S1="http://pgl.yoyo.org/as/serverlist.php?hostformat=nohtml"  ##44K - 2,539 hosts
 S2="http://mirror1.malwaredomains.com/files/justdomains" ##474K - 23,972 hosts
@@ -106,19 +105,14 @@ time=$(echo -e "HEAD $P1 HTTP/1.1\r\nHost: $H1\r\nConnection: close\r\n"|
 nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 [ -n "$time" ] && {
 	[ "$time" != "$(cat "$LASTF" 2>/dev/null)" ] && {
-		# Need update
 		DLList="$DLList $i"
 		} || {
 			[ -f "$LocalFile" ] && {
-			# UpToDate
 			GenOnly="$GenOnly $i" 
 			} || {
 				[ -f "$Running"] && {
-					# Will download this source only if another source need to be 
-					# downloaded otherwise dnsmasq do not need to be restarted/configure				
 					UpToDate="$UpToDate $i"
 					} || {
-					# First Run and UpToDate with no local file!?!
 					DLList="$DLList $i"
 					}
 			}
@@ -126,7 +120,6 @@ nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 	cat "$time" >$CIFS/$LAST
 	cat "$time" >/tmp/$LAST
 	} || {
-	# Always download if cannot know if updated
 	elog "Source do not provide time - adding S$i to download"
 	DLList="$DLList $i"
 	}
@@ -140,12 +133,8 @@ CheckUpdate
 DL
 
 [ -f $GEN ] && {
-	## load values from dnsmasq config
 	cat /etc/dnsmasq.conf >> $GEN
-
-	## apply blacklist
 	dnsmasq --conf-file=$GEN
-	## failsafe added
 	dnsmasq >/dev/null 2>&1
 
 	## dev info
@@ -158,8 +147,6 @@ DL
 	##  Backup
 	[ -d $CIFS ] && cp -f $GEN $CIFS/dnsmask.conf
 }
-## remove the generated files
-rm $TMP $GEN
 
-## This will stay in tmp until router rebooted
+rm $TMP $GEN
 echo Running > $Running
