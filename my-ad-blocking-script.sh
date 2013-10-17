@@ -1,6 +1,6 @@
 #!/bin/sh
 ## Tomato AD-Blocking script
-## by SilentBob999 https://github.com/SilentBob999/adblock
+## https://github.com/SilentBob999/adblock
 ##
 alias elog='logger -t ADBLOCK -s'
 Running="/tmp/adblock" #leave this in /tmp
