@@ -142,10 +142,6 @@ DL
 	eval DIFF=$(($END-$START))
 	eval BlockCount=$(grep -c 'address=/' $GEN)
 	elog "Blocked $BlockCount unique host in $DIFF seconds"
-	# EXTRA BACKUP
-	[ -d $CIFS ] && echo ADBLOCK blocked $BlockCount unique host in $DIFF seconds > $CIFS/counts.txt
-	##  Backup
-	[ -d $CIFS ] && cp -f $GEN $CIFS/dnsmask.conf
 }
 
 rm $TMP $GEN
