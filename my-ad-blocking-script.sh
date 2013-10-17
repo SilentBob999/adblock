@@ -127,8 +127,6 @@ done
 [ -n "$UpToDate" -a -n "$DLList" ] && DLList="$DLList $UpToDate"
 }
 
-
-eval START=$(date +%s)
 CheckUpdate
 DL
 
@@ -137,11 +135,8 @@ DL
 	dnsmasq --conf-file=$GEN
 	dnsmasq >/dev/null 2>&1
 
-	## dev info
-	eval END=$(date +%s)
-	eval DIFF=$(($END-$START))
 	eval BlockCount=$(grep -c 'address=/' $GEN)
-	elog "Blocked $BlockCount unique host in $DIFF seconds"
+	elog "Blocked $BlockCount unique host"
 }
 
 rm $TMP $GEN
