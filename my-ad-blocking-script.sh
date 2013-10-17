@@ -19,7 +19,7 @@ WHITELIST="facebook.com dropbox.com"
 
 ## Sources
 ## Warning ( ( HUGE : S5 , S8 ) ( BIG : S6 , S7 ) )
-GETS="33" #  1 2 3 4 6 7 24  # test with 33 # 1 2 3 4
+GETS="1 2 3 4 6 7"
 S1="http://pgl.yoyo.org/as/serverlist.php?hostformat=nohtml"  ##44K - 2,539 hosts
 S2="http://mirror1.malwaredomains.com/files/justdomains" ##474K - 23,972 hosts
 S3="http://www.malwaredomainlist.com/hostslist/hosts.txt" ##52K - 1,661 hosts
