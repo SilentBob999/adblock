@@ -124,8 +124,8 @@ nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 					}
 			}
 		}
-	cat "$time" >$CIFS/$LAST
-	cat "$time" >/tmp/$LAST
+	echo "$time" >$CIFS/$LAST
+	echo "$time" >/tmp/$LAST
 	} || {
 	# no timestamp, gen if no url (local host) or always download if remote host
 	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && GenOnly="$GenOnly $i" || DLList="$DLList $i"
