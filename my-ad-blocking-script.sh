@@ -136,7 +136,7 @@ done
 
 # BEGIN
 eval START=$(date +%s)
-echo "" > $GEN
+rm $GEN
 CheckUpdate
 DL
 
