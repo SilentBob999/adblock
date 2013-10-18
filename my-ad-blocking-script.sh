@@ -115,7 +115,7 @@ done
 [ -n "$UpToDateLocal" ] && ( [ -n "$DLList" -o -z "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
 }
 
-echo "" > $GEN
+rm $GEN
 CheckUpdate
 DL
 
