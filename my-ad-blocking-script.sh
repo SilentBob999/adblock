@@ -110,28 +110,22 @@ nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 		# Need update
 		DLList="$DLList $i"
 		} || {
-			[ -f "$LocalFile" ] && {
-			# UpToDate
-			GenOnly="$GenOnly $i" 
-			} || {
-				[ -f "$Running"] && {
-					# Will download this source only if another source need to be 
-					# downloaded otherwise dnsmasq do not need to be restarted/configure				
-					UpToDate="$UpToDate $i"
-					} || {
-					# First Run and UpToDate with no local file!?!
-					DLList="$DLList $i"
-					}
-			}
+			# UpToDate	
+			[ -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || UpToDate="$UpToDate $i"
 		}
 	echo "$time" >$CIFS/$LAST
 	echo "$time" >/tmp/$LAST
 	} || {
-	# no timestamp, gen if no url (local host) or always download if remote host
-	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && GenOnly="$GenOnly $i" || DLList="$DLList $i"
+	# Mark remote source that do not provide "last modified" to be downloaded
+	# LocalOnly host file are always up to date
+	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || DLList="$DLList $i"
 	}
 done
-[ -n "$UpToDate" -a -n "$DLList" ] && DLList="$DLList $UpToDate"
+# Will generate or download these UpToDate source only if another source is
+# not up-to-date or if it's the first run otherwise dnsmasq do not
+# need to be restarted/configure	
+[ -n "$UpToDate" ] && ( [ -n "$DLList" -o -z "$Running" ] ) && DLList="$DLList $UpToDate"
+[ -n "$UpToDateLocal" ] && ( [ -n "$DLList" -o -z "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
 }
 
 # BEGIN
