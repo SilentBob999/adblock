@@ -126,7 +126,7 @@ DL
 
 	eval BlockCount=$(grep -c 'address=/' $GEN)
 	elog "Blocked $BlockCount unique host"
-}
+} || elog "No Updates"
 
 rm $TMP $GEN
 echo Running > $Running
