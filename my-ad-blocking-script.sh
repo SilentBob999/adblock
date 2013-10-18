@@ -122,6 +122,7 @@ done
 [ -n "$UpToDate" -a -n "$DLList" ] && DLList="$DLList $UpToDate"
 }
 
+echo "" > $GEN
 CheckUpdate
 DL
 
