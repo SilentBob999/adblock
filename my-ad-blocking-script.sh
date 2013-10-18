@@ -152,7 +152,7 @@ DL
 	[ -d $CIFS ] && echo ADBLOCK blocked $BlockCount unique host in $DIFF seconds > $CIFS/counts.txt
 	##  Backup
 	[ -d $CIFS ] && cp -f $GEN $CIFS/dnsmask.conf
-}
+} || elog "No Updates"
 ## remove the generated files
 rm $TMP $GEN
 
