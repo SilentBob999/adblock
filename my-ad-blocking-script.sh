@@ -103,23 +103,16 @@ nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 	[ "$time" != "$(cat "$LASTF" 2>/dev/null)" ] && {
 		DLList="$DLList $i"
 		} || {
-			[ -f "$LocalFile" ] && {
-			GenOnly="$GenOnly $i" 
-			} || {
-				[ -f "$Running"] && {
-					UpToDate="$UpToDate $i"
-					} || {
-					DLList="$DLList $i"
-					}
-			}
+			[ -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || UpToDate="$UpToDate $i"
 		}
 	echo "$time" >$CIFS/$LAST
 	echo "$time" >/tmp/$LAST
 	} || {
-	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && GenOnly="$GenOnly $i" || DLList="$DLList $i"
+	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || DLList="$DLList $i"
 	}
 done
-[ -n "$UpToDate" -a -n "$DLList" ] && DLList="$DLList $UpToDate"
+[ -n "$UpToDate" ] && ( [ -a -n "$DLList" -o -z "$Running" ] ) && DLList="$DLList $UpToDate"
+[ -n "$UpToDateLocal" ] && ( [ -a -n "$DLList" -o -z "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
 }
 
 echo "" > $GEN
