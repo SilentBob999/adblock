@@ -68,7 +68,7 @@ DL() {
 		[ -d $CIFS ] && cp $TMP $LocalFile
 		Generate
 		else
-		[ -f $LocalFile ] {
+		[ -f $LocalFile ] && {
 		elog "S$i update failed - back to $LocalFile"
 		cat $LocalFile > $TMP
 		Generate
@@ -97,6 +97,7 @@ unset UpToDate GenOnly DLList
 for i in $GETS; do
 local LAST=S$i.last
 eval LocalFile="$LocalHost"
+eval url="\$S$i"
 unset LASTF time
 [ -f "/tmp/$LAST" ] && LASTF=/tmp/$LAST
 [ -f "$CIFS/$LAST" ] && LASTF=$CIFS/$LAST  # priority to CIFS to keep local copy up to date
