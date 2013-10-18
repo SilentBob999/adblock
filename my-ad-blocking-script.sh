@@ -134,8 +134,9 @@ done
 [ -n "$UpToDate" -a -n "$DLList" ] && DLList="$DLList $UpToDate"
 }
 
-
+# BEGIN
 eval START=$(date +%s)
+echo "" > $GEN
 CheckUpdate
 DL
 
@@ -163,3 +164,4 @@ rm $TMP $GEN
 
 ## This will stay in tmp until router rebooted
 echo Running > $Running
+# END
