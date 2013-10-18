@@ -136,11 +136,11 @@ done
 
 # BEGIN
 eval START=$(date +%s)
-rm $GEN
+echo "" > $GEN
 CheckUpdate
 DL
 
-
+[ -f $GEN ] && {
 	## load values from dnsmasq config
 	cat /etc/dnsmasq.conf >> $GEN
 
