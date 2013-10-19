@@ -22,6 +22,7 @@ S5="http://hosts-file.net/download/hosts.txt" #7,873K - 246,284 hosts
 S6="http://hosts-file.net/hphosts-partial.asp" #2,719K - 77,661 hosts
 S7="http://hosts-file.net/.%5Cad_servers.txt" # testing "http://hosts-file.net/ad_servers.asp" #421K - 13,727 hosts
 S8="http://adblock.mahakala.is/hosts" ##10,528K  330,332 hosts
+S9="http://someonewhocares.org/hosts/hosts" #321K - approx 10100 hosts
 
 Whitelist() {
 for w in $WHITELIST; do
