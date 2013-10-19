@@ -20,7 +20,7 @@ S3="http://www.malwaredomainlist.com/hostslist/hosts.txt" ##52K - 1,661 hosts
 S4="http://winhelp2002.mvps.org/hosts.txt" ##560K - approx 15,350 hosts
 S5="http://hosts-file.net/download/hosts.txt" #7,873K - 246,284 hosts
 S6="http://hosts-file.net/hphosts-partial.asp" #2,719K - 77,661 hosts
-S7="http://hostsfile.mine.nu/Hosts" ##2,910K - 94,926 hosts
+S7="http://hosts-file.net/ad_servers.asp" #421K - 13,727 hosts
 S8="http://adblock.mahakala.is/hosts" ##10,528K  330,332 hosts
 
 Whitelist() {
