@@ -120,6 +120,7 @@ done
 [ -n "$UpToDateLocal" ] && ( [ -n "$DLList" -o -z "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
 }
 
+eval START=$(date +%s)
 rm $GEN
 CheckUpdate
 DL
@@ -130,7 +131,9 @@ DL
 	dnsmasq >/dev/null 2>&1
 
 	eval BlockCount=$(grep -c 'address=/' $GEN)
-	elog "Blocked $BlockCount unique host"
+	eval END=$(date +%s)
+	eval DIFF=$(($END-$START))
+	elog "Blocked $BlockCount unique host  in $DIFF seconds"
 } || elog "No Updates"
 
 rm $TMP $GEN
