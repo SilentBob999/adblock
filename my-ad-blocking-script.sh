@@ -112,7 +112,7 @@ H1=$(echo $url| sed 's|^http[s]*://\([^/]*\)/.*$|\1|')
 time=$(echo -e "HEAD $P1 HTTP/1.1\r\nHost: $H1\r\nConnection: close\r\n"|
 nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 [ -n "$time" ] && {
-	[ "$time" != "$(cat "$LASTF")" ] && {
+	[ "$time" != "$(cat "$LASTF")" -o "$force" == "1" ] && {
 		elog "S$i need to be updated"
 		DLList="$DLList $i"
 		} || {
@@ -139,6 +139,8 @@ DL
 
 [ -f $GEN ] && {
 	service dnsmasq stop
+	killall -9 dnsmasq
+	wait
 	cat /etc/dnsmasq.conf >> $GEN
 	dnsmasq --conf-file=$GEN
 	dnsmasq >/dev/null 2>&1
