@@ -101,14 +101,19 @@ time=$(echo -e "HEAD $P1 HTTP/1.1\r\nHost: $H1\r\nConnection: close\r\n"|
 nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 [ -n "$time" ] && {
 	[ "$time" != "$(cat "$LASTF" 2>/dev/null)" ] && {
+		elog "S$i need to be updated"
 		DLList="$DLList $i"
 		} || {
+			elog "S$i is UpToDate"
 			[ -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || UpToDate="$UpToDate $i"
 		}
 	echo "$time" >$CIFS/$LAST
 	echo "$time" >/tmp/$LAST
 	} || {
-	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || DLList="$DLList $i"
+	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || {
+		elog "S$i dont provide 'Last Modified' information.  It force all source to be generated."
+		DLList="$DLList $i"
+		}
 	}
 done
 [ -n "$UpToDate" ] && ( [ -n "$DLList" -o -z "$Running" ] ) && DLList="$DLList $UpToDate"
