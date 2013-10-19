@@ -115,8 +115,8 @@ nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 		}
 	}
 done
-[ -n "$UpToDate" ] && ( [ -n "$DLList" -o -z "$Running" ] ) && DLList="$DLList $UpToDate"
-[ -n "$UpToDateLocal" ] && ( [ -n "$DLList" -o -z "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
+[ -n "$UpToDate" ] && ( [ -n "$DLList" -o ! -f "$Running" ] ) && DLList="$DLList $UpToDate"
+[ -n "$UpToDateLocal" ] && ( [ -n "$DLList" -o ! -f "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
 }
 
 eval START=$(date +%s)
