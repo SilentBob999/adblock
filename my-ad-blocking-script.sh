@@ -30,8 +30,6 @@ done
 }
 
 Generate() {
-service dnsmasq stop >/dev/null 2>&1
-killall -9 dnsmasq >/dev/null 2>&1
 sed -i -e '
 /%/d
 s/[[:cntrl:][:blank:]]//g
@@ -52,6 +50,7 @@ mv -f $TMP $GEN
 }
 
 DL() {
+[ -n "$DLList" -o -n "$GenOnly" ] && service dnsmasq restart >/dev/null 2>&1
 [ -n "$DLList" ] && {
 	for i in $DLList; do
 		eval url="\$S$i"
@@ -125,6 +124,7 @@ CheckUpdate
 DL
 
 [ -f $GEN ] && {
+	service dnsmasq stop >/dev/null 2>&1
 	cat /etc/dnsmasq.conf >> $GEN
 	dnsmasq --conf-file=$GEN
 	dnsmasq >/dev/null 2>&1
