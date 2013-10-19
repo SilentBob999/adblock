@@ -30,7 +30,6 @@ done
 }
 
 Generate() {
-GOTSOURCE="1"
 service dnsmasq stop >/dev/null 2>&1
 killall -9 dnsmasq >/dev/null 2>&1
 sed -i -e '
