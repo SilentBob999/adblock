@@ -10,7 +10,10 @@ Use multiple source of HOST files to configure for DNSMASQ to block Malware/Ad s
 
 #### Performance optimized if using external share (CIFS)
 
-#### Download host / generate config file only if needed
+#### Download host / generate config file only if needed.  
+If you have CIFS it will download only source that need update and generate from local source those that are up to date.  
+If you dont have CIFS it will download every source if one of them have an update.
+It does nothing if every source are up to date. Except if the router just got reboot then it will generate from CIFS if file present or download if not.
 
 
 Inspired by / fork from :
@@ -43,7 +46,32 @@ achieved by removing comment, functionality and log verbose
 
 # Instructions
 Copy code to wanup script (Administration->Scripts->Wan Up)
+
 Edit to your like.
+
+#### Some good command :  (to run from telnet, ssh or Tool->System)
+#####  To apply you change made in the wanup script do :
++ "service wan restart"   :   The wanup script from the GUI is saved in NVRAM, it is copied to RAM (/tmp/script_wanup.sh) and executed at router startup or when you restart the WAN service.
+ 
+And 1 of these two command (you need to wait a couple of minute preferably)
++ "/tmp/script_wanup.sh toggle"   :   Do it twice to turn off / turn on the script. Because the script his using a marker file in /tmp that does not get deleted if you just restart the wan service. (not needed if you reboot the router)
++ "/tmp/script_wanup.sh force"   :   Will force the download of all source and defacto enable the script.  Dont forget to use it if you have made change to source URL and have enable CIFS.
+
+
+###### The script also accept the argument "stop" but it will be stop only until next reboot / wan service restart.
+
+### UPDATE
+add a task in Administration->Scheduler.
+ Command "/tmp/script_wanup.sh"
+ 
+You can also create a custom scedule with the command "cru".  You can put it in Administration->Scripts->Init
+
+cru a <unique id> <"min hour day month week command">
+
+Twice a week on Wednesday and Saturday at 4h30 am
+
+cru a UpdateAdlist "30 4 * * 3,6  /tmp/script_wanup.sh >/dev/null 2>&1"
+
 
 ### CIFS="/cifs1/dnsmasq" 
  Adapt this to what you want, dont use JFFS, Only cifs1 or 2 or nothing.
@@ -75,13 +103,13 @@ http://pgl.yoyo.org/as/#about
 ( 4 week old at the moment these line are written )
 
 ### S2="http://mirror1.malwaredomains.com/files/justdomains" 
-#### USE IT!
+###### USE IT!
 http://www.malwaredomains.com/
 474K - 23,972 hosts
 ( updated the same day these line are written ) Seems to get 1-2 update / week
 
 ### S3="http://www.malwaredomainlist.com/hostslist/hosts.txt" 
-#### USE IT!
+###### USE IT!
 http://www.malwaredomainlist.com/mdl.php
 52K - 1,661 hosts
 ( updated the same day these line are written )
@@ -105,7 +133,7 @@ This file contains a list of site's that have been added AFTER the last full rel
 
 ### S7="http://someonewhocares.org/hosts/hosts" 
 http://someonewhocares.org/hosts/
-#321K - approx 10,100 hosts
+321K - approx 10,100 hosts
 ( 1 week old at the moment these line are written )
 
 ### S8="http://adblock.mahakala.is/hosts" 
@@ -113,5 +141,4 @@ Mother of All AD-BLOCKING (08 October 2013) BLOCKS Malware Spyware Bloatware by 
 http://forum.xda-developers.com/showthread.php?t=1916098
 10,528K  330,332 hosts
 ( 4 days old at the moment these line are written ) New. Got 3 update in a months
-
 
