@@ -3,7 +3,7 @@
 ## https://github.com/SilentBob999/adblock
 
 alias elog='logger -t ADBLOCK -s'
-Running="/tmp/adblock" #leave this in /tmp
+Running="/tmp/adblock" #leave in /tmp
 
 REDIRECTIP="0.0.0.0"
 CIFS="/cifs1/dnsmasq" # adapt to your need
@@ -13,16 +13,40 @@ LocalHost="$CIFS/HOST-S\$i"
 
 WHITELIST="facebook.com dropbox.com"
 
-GETS="1 2 3 4 7"
-S1="http://pgl.yoyo.org/as/serverlist.php?hostformat=nohtml"  ##44K - 2,539 hosts
-S2="http://mirror1.malwaredomains.com/files/justdomains" ##474K - 23,972 hosts
-S3="http://www.malwaredomainlist.com/hostslist/hosts.txt" ##52K - 1,661 hosts
-S4="http://winhelp2002.mvps.org/hosts.txt" ##560K - approx 15,350 hosts
+GETS="1 2 3 4 7 9"
+S1="http://pgl.yoyo.org/as/serverlist.php?hostformat=nohtml"  #44K - 2,539 hosts
+S2="http://mirror1.malwaredomains.com/files/justdomains" #474K - 23,972 hosts
+S3="http://www.malwaredomainlist.com/hostslist/hosts.txt" #52K - 1,661 hosts
+S4="http://winhelp2002.mvps.org/hosts.txt" #560K - approx 15,350 hosts
 S5="http://hosts-file.net/download/hosts.txt" #7,873K - 246,284 hosts
 S6="http://hosts-file.net/hphosts-partial.asp" #2,719K - 77,661 hosts
-S7="http://hosts-file.net/.%5Cad_servers.txt" # testing "http://hosts-file.net/ad_servers.asp" #421K - 13,727 hosts
-S8="http://adblock.mahakala.is/hosts" ##10,528K  330,332 hosts
-S9="http://someonewhocares.org/hosts/hosts" #321K - approx 10100 hosts
+S8="http://adblock.mahakala.is/hosts" #10,528K  330,332 hosts
+
+pidfile=/var/run/adblock.pid
+kill -0 $(cat $pidfile 2>/dev/null) &>/dev/null && {
+	elog "Another instance found ($pidfile), exiting!"
+	exit 1
+}
+echo $$ > $pidfile
+
+stop() {
+	rm "$Running" &>/dev/null
+	elog "STOP"
+	service dnsmasq restart
+}
+
+pexit() {
+	elog "Exiting"
+	rm $pidfile
+	exit $@
+}
+
+case "$1" in
+	restart) stop;;
+	stop) stop; pexit 0;;
+	toggle)	[ -e "$Running" ] && { stop; pexit 0; };;
+	force)	force="1";;
+esac
 
 Whitelist() {
 for w in $WHITELIST; do
@@ -51,7 +75,7 @@ mv -f $TMP $GEN
 }
 
 DL() {
-[ -n "$DLList" -o -n "$GenOnly" ] && service dnsmasq restart >/dev/null 2>&1
+[ -n "$DLList" -o -n "$GenOnly" ] && stop 2>&1
 [ -n "$DLList" ] && {
 	for i in $DLList; do
 		eval url="\$S$i"
@@ -62,7 +86,7 @@ DL() {
 		Generate
 		else
 		[ -f $LocalFile ] && {
-		elog "S$i update failed - back to $LocalFile"
+		elog "S$i update failed: load $LocalFile"
 		cat $LocalFile > $TMP
 		Generate
 		} || elog "S$i failed $url"
@@ -99,18 +123,18 @@ H1=$(echo $url| sed 's|^http[s]*://\([^/]*\)/.*$|\1|')
 time=$(echo -e "HEAD $P1 HTTP/1.1\r\nHost: $H1\r\nConnection: close\r\n"|
 nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 [ -n "$time" ] && {
-	[ "$time" != "$(cat "$LASTF" 2>/dev/null)" ] && {
-		elog "S$i need to be updated"
+	[ "$time" != "$(cat "$LASTF")" -o "$force" == "1" ] && {
+		elog "S$i outdated"
 		DLList="$DLList $i"
 		} || {
-			elog "S$i is UpToDate"
+			elog "S$i UpToDate"
 			[ -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || UpToDate="$UpToDate $i"
 		}
 	echo "$time" >$CIFS/$LAST
 	echo "$time" >/tmp/$LAST
 	} || {
 	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || {
-		elog "S$i dont provide 'Last Modified' information.  It force all source to be generated."
+		elog "S$i unknown 'Last Modified'"
 		DLList="$DLList $i"
 		}
 	}
@@ -125,7 +149,9 @@ CheckUpdate
 DL
 
 [ -f $GEN ] && {
-	service dnsmasq stop >/dev/null 2>&1
+	service dnsmasq stop
+	killall -9 dnsmasq
+	wait
 	cat /etc/dnsmasq.conf >> $GEN
 	dnsmasq --conf-file=$GEN
 	dnsmasq >/dev/null 2>&1
@@ -133,8 +159,9 @@ DL
 	eval BlockCount=$(grep -c 'address=/' $GEN)
 	eval END=$(date +%s)
 	eval DIFF=$(($END-$START))
-	elog "Blocked $BlockCount unique host  in $DIFF seconds"
+	elog "Blocked $BlockCount : $DIFF seconds"
 } || elog "No Updates"
 
 rm $TMP $GEN
 echo Running > $Running
+pexit 0
