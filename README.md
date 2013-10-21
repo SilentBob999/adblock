@@ -4,12 +4,14 @@ adblock
 by SilentBob999 https://github.com/SilentBob999/adblock
 
 
-Use multiple source of HOST files
-Convert them in a config file for DNSMASQ to block Malware/Ad server
+Use multiple source of HOST files to configure for DNSMASQ to block Malware/Ad server.
 
-Work with or without non-volatile storage
-Performance optimized if using external share (CIFS)
-Download host / generate config file only if needed
+#### Work with or without non-volatile storage
+
+#### Performance optimized if using external share (CIFS)
+
+#### Download host / generate config file only if needed
+
 
 Inspired by / fork from :
 
@@ -21,9 +23,14 @@ Inspired by / fork from :
 
 Tested on :
 
-  Linksys E2500 v1.0
+  Linksys E2500 v1.0 (60mb of ram)
   
   Tomato Version 1.28 by shibby
+  
+  On this router I can activate all source provided (27671K) and it will survive. 
+  At the worse moment it got 14mb of free ram but once finished it settle at around 44MB of free ram. 
+  This his achieve by downloading, generating, remove duplicate and delete temp on each single source before doing the next. 
+  It can achieve all that in less than 12 minutes while any other script I test will crash with such big source.
   
  
 ## Barebones branch
