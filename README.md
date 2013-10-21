@@ -4,12 +4,14 @@ adblock
 by SilentBob999 https://github.com/SilentBob999/adblock
 
 
-Use multiple source of HOST files
-Convert them in a config file for DNSMASQ to block Malware/Ad server
+Use multiple source of HOST files to configure for DNSMASQ to block Malware/Ad server.
 
-Work with or without non-volatile storage
-Performance optimized if using external share (CIFS)
-Download host / generate config file only if needed
+#### Work with or without non-volatile storage
+
+#### Performance optimized if using external share (CIFS)
+
+#### Download host / generate config file only if needed
+
 
 Inspired by / fork from :
 
@@ -21,9 +23,14 @@ Inspired by / fork from :
 
 Tested on :
 
-  Linksys E2500 v1.0
+  Linksys E2500 v1.0 (60mb of ram)
   
   Tomato Version 1.28 by shibby
+  
+  On this router I can activate all source provided (27671K) and it will survive. 
+  At the worse moment it got 14mb of free ram but once finished it settle at around 44MB of free ram. 
+  This his achieve by downloading, generating, remove duplicate and delete temp on each single source before doing the next. 
+  It can achieve all that in less than 12 minutes while any other script I test will crash with such big source.
   
  
 ## Barebones branch
@@ -96,11 +103,10 @@ This file contains a list of site's that have been added AFTER the last full rel
 2,719K - 77,661 hosts - by Malwarebytes Corp
 ( updated the same day these line are written )
 
-### S7="http://hosts-file.net/ad_servers.asp"
-http://hosts-file.net/?s=classifications
-ATS classificaton only (Ad and Tracking) - included in Source 5
-421K - 13,727 hosts - by Malwarebytes Corp
-( updated the same day these line are written )
+### S7="http://someonewhocares.org/hosts/hosts" 
+http://someonewhocares.org/hosts/
+#321K - approx 10,100 hosts
+( 1 week old at the moment these line are written )
 
 ### S8="http://adblock.mahakala.is/hosts" 
 Mother of All AD-BLOCKING (08 October 2013) BLOCKS Malware Spyware Bloatware by BSDgeek_Jake
