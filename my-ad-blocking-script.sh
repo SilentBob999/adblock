@@ -1,24 +1,20 @@
 #!/bin/sh
 ## Tomato AD-Blocking script
-## by SilentBob999 https://github.com/SilentBob999/adblock
-##
-alias elog='logger -t ADBLOCK -s'
-Running="/tmp/adblock" #leave this in /tmp
+## https://github.com/SilentBob999/adblock
 
-##
-## variables
+alias elog='logger -t ADBLOCK -s'
+Running="/tmp/adblock" #leave in /tmp
+
 REDIRECTIP="0.0.0.0"
-CIFS="/cifs1/dnsmasq" # adapt to your need - no space - DONT USE JFFS
+CIFS="/cifs1/dnsmasq" # adapt to your need
 LocalHost="$CIFS/HOST-S\$i"
 [ -d $CIFS ] && TMP="$CIFS/tmp" || TMP="/tmp/tmp"
 [ -d $CIFS ] && GEN="$CIFS/gen" || GEN="/tmp/gen"
 
-
-## remove/whitelist websites
 WHITELIST="facebook.com dropbox.com"
 
 ## Sources
-## Warning ( ( HUGE : S5 , S8 ) ( BIG : S6 , S7 ) )
+## Warning ( ( HUGE : S5 , S8 ) ( BIG : S6 ) )
 GETS="1 2 3 4"
 S1="http://pgl.yoyo.org/as/serverlist.php?hostformat=nohtml"  ##44K - 2,539 hosts
 S2="http://mirror1.malwaredomains.com/files/justdomains" ##474K - 23,972 hosts
@@ -26,19 +22,48 @@ S3="http://www.malwaredomainlist.com/hostslist/hosts.txt" ##52K - 1,661 hosts
 S4="http://winhelp2002.mvps.org/hosts.txt" ##560K - approx 15,350 hosts
 S5="http://hosts-file.net/download/hosts.txt" #7,873K - 246,284 hosts - by Malwarebytes Corp
 S6="http://hosts-file.net/hphosts-partial.asp" #2,719K - 77,661 hosts - by Malwarebytes Corp
-S7="http://hostsfile.mine.nu/Hosts" ##2,910K - 94,926 hosts
+S7="http://someonewhocares.org/hosts/hosts" #321K - approx 10,100 hosts
 S8="http://adblock.mahakala.is/hosts" ##10,528K  330,332 hosts
 
+# PID, exit if the process is already running
+pidfile=/var/run/adblock.pid
+kill -0 $(cat $pidfile 2>/dev/null) &>/dev/null && {
+	elog "Another instance found ($pidfile), exiting!"
+	exit 1
+}
+echo $$ > $pidfile
+
+# Restart dnsmasq without the config file.  Stop blocking domain.  Free RAM
+stop() {
+	rm "$Running" &>/dev/null
+	elog "STOP"
+	service dnsmasq restart
+}
+
+pexit() {
+	elog "Exiting"
+	rm $pidfile
+	exit $@
+}
+
+# Catch argument passed to the script
+case "$1" in
+	restart) stop;;
+	stop) stop; pexit 0;;
+	toggle)	[ -e "$Running" ] && { stop; pexit 0; };;
+	force)	force="1";;
+esac
+
+# Remove whitelisted site from the file
+# Yeah this can be inside the generate function
 Whitelist() {
 for w in $WHITELIST; do
 sed -i -e "/\.$w/d /\/$w/d" $TMP
 done
 }
 
+# Format the file for dnsmasq
 Generate() {
-GOTSOURCE="1"
-service dnsmasq stop >/dev/null 2>&1
-killall -9 dnsmasq >/dev/null 2>&1
 sed -i -e '
 /%/d
 s/[[:cntrl:][:blank:]]//g
@@ -58,7 +83,12 @@ cat $GEN | sort -u > $TMP
 mv -f $TMP $GEN
 }
 
+# This function Download / Or select the file to generate
+# Need to be call after CheckUpdate
 DL() {
+# Call stop to free ram if a config file will be generated	
+[ -n "$DLList" -o -n "$GenOnly" ] && stop 2>&1
+# Download
 [ -n "$DLList" ] && {
 	for i in $DLList; do
 		eval url="\$S$i"
@@ -69,7 +99,7 @@ DL() {
 		Generate
 		else
 		[ -f $LocalFile ] && {
-		elog "S$i update failed - back to $LocalFile"
+		elog "S$i update failed: load $LocalFile"
 		cat $LocalFile > $TMP
 		Generate
 		} || elog "S$i failed $url"
@@ -78,6 +108,7 @@ DL() {
 	done
 	wait
 }
+# Generate from local (if up to date or only local)
 [ -n "$GenOnly" ] && {
 	for i in $GenOnly; do
 		eval LocalFile="$LocalHost"
@@ -92,6 +123,7 @@ DL() {
 }
 }
 
+# Check for update
 CheckUpdate() {
 unset UpToDate GenOnly DLList
 for i in $GETS; do
@@ -100,62 +132,69 @@ eval LocalFile="$LocalHost"
 eval url="\$S$i"
 unset LASTF time
 [ -f "/tmp/$LAST" ] && LASTF=/tmp/$LAST
-[ -f "$CIFS/$LAST" ] && LASTF=$CIFS/$LAST  # priority to CIFS to keep local copy up to date
+[ -f "$CIFS/$LAST" ] && LASTF=$CIFS/$LAST  # Use the last modified time in CIFS in priority to help keep the local file up to date
 P1=$(echo $url| sed 's|^http[s]*://[^/]*\(/.*\)$|\1|')
 H1=$(echo $url| sed 's|^http[s]*://\([^/]*\)/.*$|\1|')
 time=$(echo -e "HEAD $P1 HTTP/1.1\r\nHost: $H1\r\nConnection: close\r\n"|
 nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 [ -n "$time" ] && {
-	[ "$time" != "$(cat "$LASTF" 2>/dev/null)" ] && {
+	[ "$time" != "$(cat "$LASTF")" -o "$force" == "1" ] && {
 		# Need update
+		elog "S$i outdated"
 		DLList="$DLList $i"
 		} || {
 			# UpToDate	
+			elog "S$i UpToDate"
 			[ -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || UpToDate="$UpToDate $i"
 		}
+	# Write modified time to RAM and in CIFS
 	echo "$time" >$CIFS/$LAST
 	echo "$time" >/tmp/$LAST
 	} || {
 	# Mark remote source that do not provide "last modified" to be downloaded
 	# LocalOnly host file are always up to date
-	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || DLList="$DLList $i"
+	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || {
+		elog "S$i unknown 'Last Modified'"
+		DLList="$DLList $i"
+		}
 	}
 done
 # Will generate or download these UpToDate source only if another source is
 # not up-to-date or if it's the first run otherwise dnsmasq do not
 # need to be restarted/configure	
-[ -n "$UpToDate" ] && ( [ -n "$DLList" -o -z "$Running" ] ) && DLList="$DLList $UpToDate"
-[ -n "$UpToDateLocal" ] && ( [ -n "$DLList" -o -z "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
+[ -n "$UpToDate" ] && ( [ -n "$DLList" -o ! -f "$Running" ] ) && DLList="$DLList $UpToDate"
+[ -n "$UpToDateLocal" ] && ( [ -n "$DLList" -o ! -f "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
 }
 
 # BEGIN
 eval START=$(date +%s)
-rm $GEN
+rm $GEN 
 CheckUpdate
 DL
 
 [ -f $GEN ] && {
-	## load values from dnsmasq config
+	# Stop and kill dnsmasq to be sure we can start it with the config
+	service dnsmasq stop
+	killall -9 dnsmasq
+	wait
+	# Add the original config file
 	cat /etc/dnsmasq.conf >> $GEN
-
-	## apply blacklist
+	# Start dnsmasq with the generated config file
 	dnsmasq --conf-file=$GEN
-	## failsafe added
+	# Failsafe - in case the GEN file his somehow problematic
 	dnsmasq >/dev/null 2>&1
-
-	## dev info
+	eval BlockCount=$(grep -c 'address=/' $GEN)
 	eval END=$(date +%s)
 	eval DIFF=$(($END-$START))
-	eval BlockCount=$(grep -c 'address=/' $GEN)
 	elog "Blocked $BlockCount unique host in $DIFF seconds"
-	# EXTRA BACKUP
+	# EXTRA 
 	[ -d $CIFS ] && echo ADBLOCK blocked $BlockCount unique host in $DIFF seconds > $CIFS/counts.txt
-	##  Backup
 	[ -d $CIFS ] && cp -f $GEN $CIFS/dnsmask.conf
 } || elog "No Updates"
+
 ## remove the generated files
 rm $TMP $GEN
-
-## This will stay in tmp until router rebooted
 echo Running > $Running
+
 # END
+pexit 0
