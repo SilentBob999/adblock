@@ -1,4 +1,4 @@
-adblock-test
+adblock
 =======
 ##  Tomato AD-Blocking script
 by SilentBob999 https://github.com/SilentBob999/adblock
