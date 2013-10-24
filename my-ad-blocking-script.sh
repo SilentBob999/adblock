@@ -2,8 +2,10 @@
 ## Tomato AD-Blocking script
 ## https://github.com/SilentBob999/adblock
 
-alias elog='logger -t ADBLOCK -s'
-Running="/tmp/adblock" #leave in /tmp
+ADB="/tmp/ADBLOCK.sh"
+{
+cat <<'ENDF' >$ADB
+#!/bin/sh
 
 REDIRECTIP="0.0.0.0"
 CIFS="/cifs1/dnsmasq" # adapt to your need
@@ -25,176 +27,57 @@ S6="http://hosts-file.net/hphosts-partial.asp" #2,719K - 77,661 hosts - by Malwa
 S7="http://someonewhocares.org/hosts/hosts" #321K - approx 10,100 hosts
 S8="http://adblock.mahakala.is/hosts" ##10,528K  330,332 hosts
 
-# PID, exit if the process is already running
-pidfile=/var/run/adblock.pid
-kill -0 $(cat $pidfile 2>/dev/null) &>/dev/null && {
-	elog "Another instance found ($pidfile), exiting!"
-	exit 1
-}
-echo $$ > $pidfile
-
-# Restart dnsmasq without the config file.  Stop blocking domain.  Free RAM
-stop() {
-	rm "$Running" &>/dev/null
-	elog "STOP"
-	service dnsmasq restart
+ENDF
 }
 
-pexit() {
-	elog "Exiting"
-	rm $pidfile
-	exit $@
+b64="openssl enc -base64 -d"
+{
+cat <<'ENDF'| $b64 |gunzip >>$ADB
+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 
+RDFrCyH+C7IAJxvfEQAA 
+ENDF
 }
 
-# Catch argument passed to the script
-case "$1" in
-	restart) stop;;
-	stop) stop; pexit 0;;
-	toggle)	[ -e "$Running" ] && { stop; pexit 0; };;
-	force)	force="1";;
-esac
-
-# Remove whitelisted site from the file
-# Yeah this can be inside the generate function
-Whitelist() {
-for w in $WHITELIST; do
-sed -i -e "/\.$w/d /\/$w/d" $TMP
-done
-}
-
-# Format the file for dnsmasq
-Generate() {
-sed -i -e '
-/%/d
-s/[[:cntrl:][:blank:]]//g
-s/^[ \t]*//;s/[ \t]*$//
-s/[[:space:]]*\[.*$//
-s/[[:space:]]*\].*$//
-/[[:space:]]*#.*$/ s/[[:space:]]*#.*$//  
-/^$/d
-/127\.0\.0\.1/ s/^127\.0\.0\.1[ \t]*//
-/^www[0-9]\./ s/^www[0-9]\.//   
-/^www\./ s/^www\.//
-s|$|/'$REDIRECTIP'|
-s|^|address=/|' $TMP
-Whitelist
-cat $TMP >> $GEN
-cat $GEN | sort -u > $TMP
-mv -f $TMP $GEN
-}
-
-# This function Download / Or select the file to generate
-# Need to be call after CheckUpdate
-DL() {
-# Call stop to free ram if a config file will be generated	
-[ -n "$DLList" -o -n "$GenOnly" ] && stop 2>&1
-# Download
-[ -n "$DLList" ] && {
-	for i in $DLList; do
-		eval url="\$S$i"
-		eval LocalFile="$LocalHost"
-		if wget $url -U "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)" -O - > $TMP ; then
-		elog "S$i downloaded $url"
-		[ -d $CIFS ] && cp $TMP $LocalFile
-		Generate
-		else
-		[ -f $LocalFile ] && {
-		elog "S$i update failed: load $LocalFile"
-		cat $LocalFile > $TMP
-		Generate
-		} || elog "S$i failed $url"
-		fi
-		wait
-	done
-	wait
-}
-# Generate from local (if up to date or only local)
-[ -n "$GenOnly" ] && {
-	for i in $GenOnly; do
-		eval LocalFile="$LocalHost"
-		[ -f $LocalFile ] && {
-			elog "Loading $LocalFile"
-			cat $LocalFile > $TMP
-			Generate
-		}
-		wait
-	done
-	wait
-}
-}
-
-# Check for update
-CheckUpdate() {
-unset UpToDate GenOnly DLList
-for i in $GETS; do
-local LAST=S$i.last
-eval LocalFile="$LocalHost"
-eval url="\$S$i"
-unset LASTF time
-[ -f "/tmp/$LAST" ] && LASTF=/tmp/$LAST
-[ -f "$CIFS/$LAST" ] && LASTF=$CIFS/$LAST  # Use the last modified time in CIFS in priority to help keep the local file up to date
-P1=$(echo $url| sed 's|^http[s]*://[^/]*\(/.*\)$|\1|')
-H1=$(echo $url| sed 's|^http[s]*://\([^/]*\)/.*$|\1|')
-time=$(echo -e "HEAD $P1 HTTP/1.1\r\nHost: $H1\r\nConnection: close\r\n"|
-nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
-[ -n "$time" ] && {
-	[ "$time" != "$(cat "$LASTF")" -o "$force" == "1" ] && {
-		# Need update
-		elog "S$i outdated"
-		DLList="$DLList $i"
-		} || {
-			# UpToDate	
-			elog "S$i UpToDate"
-			[ -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || UpToDate="$UpToDate $i"
-		}
-	# Write modified time to RAM and in CIFS
-	echo "$time" >$CIFS/$LAST
-	echo "$time" >/tmp/$LAST
-	} || {
-	# Mark remote source that do not provide "last modified" to be downloaded
-	# LocalOnly host file are always up to date
-	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || {
-		elog "S$i unknown 'Last Modified'"
-		DLList="$DLList $i"
-		}
-	}
-done
-# Will generate or download these UpToDate source only if another source is
-# not up-to-date or if it's the first run otherwise dnsmasq do not
-# need to be restarted/configure	
-[ -n "$UpToDate" ] && ( [ -n "$DLList" -o ! -f "$Running" ] ) && DLList="$DLList $UpToDate"
-[ -n "$UpToDateLocal" ] && ( [ -n "$DLList" -o ! -f "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
-}
-
-# BEGIN
-eval START=$(date +%s)
-rm $GEN 
-CheckUpdate
-DL
-
-[ -f $GEN ] && {
-	# Stop and kill dnsmasq to be sure we can start it with the config
-	service dnsmasq stop
-	killall -9 dnsmasq
-	wait
-	# Add the original config file
-	cat /etc/dnsmasq.conf >> $GEN
-	# Start dnsmasq with the generated config file
-	dnsmasq --conf-file=$GEN
-	# Failsafe - in case the GEN file his somehow problematic
-	dnsmasq >/dev/null 2>&1
-	eval BlockCount=$(grep -c 'address=/' $GEN)
-	eval END=$(date +%s)
-	eval DIFF=$(($END-$START))
-	elog "Blocked $BlockCount unique host in $DIFF seconds"
-	# EXTRA 
-	[ -d $CIFS ] && echo ADBLOCK blocked $BlockCount unique host in $DIFF seconds > $CIFS/counts.txt
-	[ -d $CIFS ] && cp -f $GEN $CIFS/dnsmask.conf
-} || elog "No Updates"
-
-## remove the generated files
-rm $TMP $GEN
-echo Running > $Running
-
-# END
-pexit 0
+chmod 775 $ADB
+$ADB
