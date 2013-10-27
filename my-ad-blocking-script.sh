@@ -51,7 +51,7 @@ case "$1" in
 	restart) stop;;
 	stop) stop; pexit 0;;
 	toggle)	[ -e "$Running" ] && { stop; pexit 0; };;
-	force)	force="1";;
+	force) rm "$Running" &>/dev/null;;
 esac
 
 # Remove whitelisted site from the file
@@ -138,7 +138,7 @@ H1=$(echo $url| sed 's|^http[s]*://\([^/]*\)/.*$|\1|')
 time=$(echo -e "HEAD $P1 HTTP/1.1\r\nHost: $H1\r\nConnection: close\r\n"|
 nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 [ -n "$time" ] && {
-	[ "$time" != "$(cat "$LASTF")" -o "$force" == "1" ] && {
+	[ "$time" != "$(cat "$LASTF")" ] && {
 		# Need update
 		elog "S$i outdated"
 		DLList="$DLList $i"
