@@ -58,9 +58,12 @@ s/[[:space:]]*\].*$//
 s|$|/'$REDIRECTIP'|
 s|^|address=/|' $TMP
 Whitelist
-cat $TMP >> $GEN
-cat $GEN | sort -u > $TMP
-mv -f $TMP $GEN
+#cat $TMP >> $GEN
+#cat $GEN | sort -u > $TMP
+#mv -f $TMP $GEN
+[ ! -f $GEN ] && echo "" > $GEN
+sort -u -o $TMP $TMP
+sort -m -u -o $GEN $TMP $GEN
 }
 
 # This function Download / Or select the file to generate
