@@ -156,14 +156,13 @@ DL
 	}
 
 [ -f $GEN ] && {
-	echo adb > $Running
 	service dnsmasq stop
 	killall -9 dnsmasq
 	wait
 	# Add the original config file
 	cat /etc/dnsmasq.conf >> $GEN
 	# Start blocking
-	dnsmasq --conf-file=$GEN
+	dnsmasq --conf-file=$GEN && echo adb > $Running
 	# Failsafe
 	dnsmasq &>/dev/null
 	eval BlockCount=$(grep -c 'address=/' $GEN)
