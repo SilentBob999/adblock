@@ -168,7 +168,7 @@ DL
 	# Start dnsmasq with the generated config file
 	dnsmasq --conf-file=$GEN
 	# Failsafe - in case the GEN file his somehow problematic
-	dnsmasq >/dev/null 2>&1
+	dnsmasq &>/dev/null
 	eval BlockCount=$(grep -c 'address=/' $GEN)
 	eval END=$(date +%s)
 	eval DIFF=$(($END-$START))
@@ -179,7 +179,7 @@ DL
 } || elog "No Updates"
 
 ## remove the generated files
-rm $TMP $GEN
+rm $TMP $GEN &>/dev/null
 echo Running > $Running
 
 # END
