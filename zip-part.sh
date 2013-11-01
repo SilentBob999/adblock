@@ -5,7 +5,7 @@ cat <<'ENDF'|gzip|openssl enc -base64
 alias elog='logger -t ADBLOCK -s'
 Running="/tmp/adblock" #leave in /tmp
 
-# PID, exit if the process is already running
+# Check if already running
 pidfile=/var/run/adblock.pid
 kill -0 $(cat $pidfile 2>/dev/null) &>/dev/null && {
 	elog "Another instance found ($pidfile), exiting!"
@@ -13,7 +13,7 @@ kill -0 $(cat $pidfile 2>/dev/null) &>/dev/null && {
 }
 echo $$ > $pidfile
 
-# Restart dnsmasq without the config file.  Stop blocking domain.  Free RAM
+# Stop blocking.  Free RAM
 stop() {
 	rm "$Running" &>/dev/null
 	elog "STOP"
@@ -35,7 +35,6 @@ case "$1" in
 esac
 
 # Remove whitelisted site from the file
-# Yeah this can be inside the generate function
 Whitelist() {
 for w in $WHITELIST; do
 sed -i -e "/\.$w/d /\/$w/d" $TMP
@@ -64,7 +63,6 @@ mv -f $TMP $GEN
 }
 
 # This function Download / Or select the file to generate
-# Need to be call after CheckUpdate
 DL() {
 # Call stop to free ram if a config file will be generated	
 [ -n "$DLList" -o -n "$GenOnly" ] && stop 2>&1
@@ -131,7 +129,7 @@ nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 	echo "$time" >$CIFS/$LAST
 	echo "$time" >/tmp/$LAST
 	} || {
-	# Mark remote source that do not provide "last modified" to be downloaded
+	# No "last modified" then download
 	# LocalOnly host file are always up to date
 	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || {
 		elog "S$i unknown 'Last Modified'"
@@ -159,15 +157,14 @@ DL
 	}
 
 [ -f $GEN ] && {
-	# Stop and kill dnsmasq to be sure we can start it with the config
 	service dnsmasq stop
 	killall -9 dnsmasq
 	wait
 	# Add the original config file
 	cat /etc/dnsmasq.conf >> $GEN
-	# Start dnsmasq with the generated config file
+	# Start blocking
 	dnsmasq --conf-file=$GEN
-	# Failsafe - in case the GEN file his somehow problematic
+	# Failsafe
 	dnsmasq &>/dev/null
 	eval BlockCount=$(grep -c 'address=/' $GEN)
 	eval END=$(date +%s)
@@ -180,7 +177,7 @@ DL
 
 ## remove the generated files
 rm $TMP $GEN &>/dev/null
-echo Running > $Running
+echo adb > $Running
 
 # END
 pexit 0
