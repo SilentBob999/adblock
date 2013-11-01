@@ -15,14 +15,14 @@ echo $$ > $pidfile
 
 # Stop blocking.  Free RAM
 stop() {
-	rm "$Running" &>/dev/null
 	elog "STOP"
+	rm "$Running" &>/dev/null
 	service dnsmasq restart
 }
 
 pexit() {
 	elog "Exiting"
-	rm $pidfile
+	rm $TMP $GEN $pidfile &>/dev/null
 	exit $@
 }
 
@@ -65,7 +65,7 @@ mv -f $TMP $GEN
 # This function Download / Or select the file to generate
 DL() {
 # Call stop to free ram if a config file will be generated	
-[ -n "$DLList" -o -n "$GenOnly" ] && stop 2>&1
+[ -n "$DLList" -o -n "$GenOnly" ] && stop
 # Download
 [ -n "$DLList" ] && {
 	for i in $DLList; do
@@ -142,11 +142,12 @@ done
 # need to be restarted/configure	
 [ -n "$UpToDate" ] && ( [ -n "$DLList" -o ! -f "$Running" ] ) && DLList="$DLList $UpToDate"
 [ -n "$UpToDateLocal" ] && ( [ -n "$DLList" -o ! -f "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
+wait
 }
 
 # BEGIN
 eval START=$(date +%s)
-rm $GEN 
+rm $GEN &>/dev/null
 cru d ADBTmpCheck &>/dev/null
 [ "$CIFSRequire" == "N" -o -d $CIFS ] && {
 CheckUpdate
@@ -176,10 +177,6 @@ DL
 	[ -d $CIFS ] && cp -f $GEN $CIFS/dnsmask.conf
 } || elog "No Updates"
 
-## remove the generated files
-rm $TMP $GEN &>/dev/null
-
-# END
 pexit 0
 
 ENDF
