@@ -60,6 +60,7 @@ Whitelist
 cat $TMP >> $GEN
 cat $GEN | sort -u > $TMP
 mv -f $TMP $GEN
+wait
 }
 
 # This function Download / Or select the file to generate
@@ -82,9 +83,7 @@ DL() {
 		Generate
 		} || elog "S$i failed $url"
 		fi
-		wait
 	done
-	wait
 }
 # Generate from local (if up to date or only local)
 [ -n "$GenOnly" ] && {
@@ -95,10 +94,9 @@ DL() {
 			cat $LocalFile > $TMP
 			Generate
 		}
-		wait
 	done
-	wait
 }
+wait
 }
 
 # Check for update
