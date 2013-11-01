@@ -157,6 +157,7 @@ DL
 	}
 
 [ -f $GEN ] && {
+	echo adb > $Running
 	service dnsmasq stop
 	killall -9 dnsmasq
 	wait
@@ -177,11 +178,9 @@ DL
 
 ## remove the generated files
 rm $TMP $GEN &>/dev/null
-echo adb > $Running
 
 # END
 pexit 0
-
 
 ENDF
 }
