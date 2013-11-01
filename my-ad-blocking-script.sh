@@ -81,4 +81,4 @@ ENDF
 }
 
 chmod 775 $ADB
-[ -n "$1" ] && $ADB $1 || $ADB force
+$ADB $1
