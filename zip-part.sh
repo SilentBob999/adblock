@@ -149,8 +149,14 @@ done
 # BEGIN
 eval START=$(date +%s)
 rm $GEN 
+cru d ADBTmpCheck &>/dev/null
+[ "$CIFSRequire" == "N" -o -d $CIFS ] && {
 CheckUpdate
 DL
+} || {
+	elog "Update skip because CIFS is required but offline. Will check again every 4 hour"
+	cru a ADBTmpCheck "0 0,4,8,12,16,20 * * * /tmp/script_wanup.sh"
+	}
 
 [ -f $GEN ] && {
 	# Stop and kill dnsmasq to be sure we can start it with the config

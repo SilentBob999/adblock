@@ -10,13 +10,15 @@ cat <<'ENDF' >$ADB
 REDIRECTIP="0.0.0.0"
 CIFS="/cifs1/dnsmasq" # adapt to your need
 LocalHost="$CIFS/HOST-S\$i"
+CIFSRequire="N" # "Y"/"N" Set to "N" if the sources selected can be handle in RAM
+
 [ -d $CIFS ] && TMP="$CIFS/tmp" || TMP="/tmp/tmp"
 [ -d $CIFS ] && GEN="$CIFS/gen" || GEN="/tmp/gen"
 
 WHITELIST="facebook.com dropbox.com"
 
 ## Sources
-## Warning ( ( HUGE : S5 , S8 ) ( BIG : S6 ) )
+## Warning ( ( HUGE : S5 , S8 ) ( BIG : S6 ) ) Think about setting CIFSRequire to "Y" if you select them
 GETS="1 2 3 4"
 S1="http://pgl.yoyo.org/as/serverlist.php?hostformat=nohtml"  ##44K - 2,539 hosts
 S2="http://mirror1.malwaredomains.com/files/justdomains" ##474K - 23,972 hosts
