@@ -62,7 +62,7 @@ s|$|/'$REDIRECTIP'|
 s|^|address=/|' $TMP
 Whitelist
 cat $TMP >> $GEN
-cat $GEN | sort -u > $TMP
+cat $GEN | sort -u > $TMP || elog "ERROR ; sort failed"
 mv -f $TMP $GEN
 wait
 }
@@ -166,7 +166,7 @@ DL
 	# Add the original config file
 	cat /etc/dnsmasq.conf >> $GEN
 	# Start blocking
-	dnsmasq --conf-file=$GEN && echo adb > $Running
+	dnsmasq --conf-file=$GEN && echo adb > $Running || elog "ERROR ; dnsmasq config failed"
 	# Failsafe
 	dnsmasq &>/dev/null
 	eval BlockCount=$(grep -c 'address=/' $GEN)
