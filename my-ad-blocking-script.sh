@@ -9,11 +9,7 @@ cat <<'ENDF' >$ADB
 
 REDIRECTIP="0.0.0.0"
 CIFS="/cifs1/dnsmasq" # adapt to your need
-LocalHost="$CIFS/HOST-S\$i"
 CIFSRequire="N" # "Y"/"N"
-
-[ -d $CIFS ] && TMP="$CIFS/tmp" || TMP="/tmp/tmp"
-[ -d $CIFS ] && GEN="$CIFS/gen" || GEN="/tmp/gen"
 
 WHITELIST="facebook.com dropbox.com"
 

@@ -4,6 +4,10 @@ cat <<'ENDF'|gzip|openssl enc -base64
 
 alias elog='logger -t ADBLOCK -s'
 Running="/tmp/adblock" #leave in /tmp
+LocalHost="$CIFS/HOST-S\$i"
+
+[ -d $CIFS ] && TMP="$CIFS/tmp" || TMP="/tmp/tmp"
+[ -d $CIFS ] && GEN="$CIFS/gen" || GEN="/tmp/gen"
 
 # Check if already running
 pidfile=/var/run/adblock.pid
