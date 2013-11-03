@@ -35,7 +35,7 @@ case "$1" in
 	restart) stop;;
 	stop) stop; pexit 0;;
 	toggle)	[ -e "$Running" ] && { stop; pexit 0; };;
-	force) rm "$Running" &>/dev/null ; force="1";;
+	force) stop; force="1";;
 esac
 
 # Remove whitelisted site from the file
