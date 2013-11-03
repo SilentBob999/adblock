@@ -12,7 +12,7 @@ LocalHost="$CIFS/HOST-S\$i"
 # Check if already running
 pidfile=/var/run/adblock.pid
 kill -0 $(cat $pidfile 2>/dev/null) &>/dev/null && {
-	elog "Another instance found ($pidfile), exiting!"
+	elog "Another instance found ($pidfile, $(cat $pidfile)), exiting!"
 	exit 1
 }
 echo $$ > $pidfile
