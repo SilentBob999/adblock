@@ -132,7 +132,7 @@ nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 			[ -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || UpToDate="$UpToDate $i"
 		}
 	# Write modified time to RAM and in CIFS
-	echo "$time" >$CIFS/$LAST
+	[ -d $CIFS ] && echo "$time" >$CIFS/$LAST
 	echo "$time" >/tmp/$LAST
 	} || {
 	# No "last modified" then download
