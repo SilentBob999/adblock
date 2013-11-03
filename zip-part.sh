@@ -21,7 +21,7 @@ echo $$ > $pidfile
 stop() {
 	elog "STOP"
 	rm "$Running" &>/dev/null
-	service dnsmasq restart
+	service dnsmasq restart &>/dev/null
 }
 
 pexit() {
@@ -112,7 +112,7 @@ eval LocalFile="$LocalHost"
 eval url="\$S$i"
 unset LASTF time
 [ -f "/tmp/$LAST" ] && LASTF=/tmp/$LAST
-[ -f "$CIFS/$LAST" ] && LASTF=$CIFS/$LAST  # Use the last modified time in CIFS in priority to help keep the local file up to date
+[ -f "$CIFS/$LAST" ] && LASTF=$CIFS/$LAST
 P1=$(echo $url| sed 's|^http[s]*://[^/]*\(/.*\)$|\1|')
 H1=$(echo $url| sed 's|^http[s]*://\([^/]*\)/.*$|\1|')
 time=$(echo -e "HEAD $P1 HTTP/1.1\r\nHost: $H1\r\nConnection: close\r\n"|
