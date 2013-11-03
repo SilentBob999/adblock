@@ -61,9 +61,13 @@ s/[[:space:]]*\].*$//
 s|$|/'$REDIRECTIP'|
 s|^|address=/|' $TMP
 Whitelist
-cat $TMP >> $GEN
-cat $GEN | sort -u > $TMP || elog "ERROR ; sort failed"
-mv -f $TMP $GEN
+#cat $TMP >> $GEN
+#cat $GEN | sort -u > $TMP || elog "ERROR ; sort failed"
+#mv -f $TMP $GEN
+[ -f $GEN ] || echo "" > $GEN
+if [ -d $CIFS ]; then sort -o $TMP -T $CIFS $TMP && sort -m -u -o $GEN -T $CIFS $TMP $GEN || elog "ERROR ; sort failed"
+else sort -o $TMP $TMP && sort -m -u -o $GEN $TMP $GEN || elog "ERROR ; sort failed"; fi
+rm $TMP &>/dev/null
 wait
 }
 
