@@ -156,31 +156,35 @@ eval START=$(date +%s)
 rm $GEN &>/dev/null
 cru d ADBTmpCheck &>/dev/null
 [ "$CIFSRequire" == "N" -o -d $CIFS ] && {
-CheckUpdate
-DL
+	CheckUpdate
+	DL
+	[ -f $GEN ] && {
+		SIZE=$(du -sh $GEN | awk '{ print $1 }')
+		service dnsmasq stop &>/dev/null
+		killall -9 dnsmasq &>/dev/null
+		wait
+		# Add the original config file
+		cat /etc/dnsmasq.conf >> $GEN
+		# Start blocking
+		dnsmasq --conf-file=$GEN && {
+			echo adb > $Running
+			eval BlockCount=$(grep -c 'address=/' $GEN)
+			eval END=$(date +%s)
+			eval DIFF=$(($END-$START))
+			# EXTRA 
+			[ -d $CIFS ] && echo ADBLOCK blocked $BlockCount unique host in $DIFF seconds > $CIFS/counts.txt
+			[ -d $CIFS ] && cp -f $GEN $CIFS/dnsmask.conf
+			elog "Blocked $BlockCount unique host in $DIFF seconds"
+			} || {
+			elog "ERROR ; dnsmasq config ($SIZE) failed"
+			dnsmasq &>/dev/null && elog "failsafe ; load dnsmasq with default config (block nothing)" || elog "TROUBLE"
+			}
+		wait
+	} || elog "No Updates"
 } || {
 	elog "Update skip because CIFS is required but offline. Will check again every 4 hour"
 	cru a ADBTmpCheck "0 0,4,8,12,16,20 * * * /tmp/script_wanup.sh"
 	}
-
-[ -f $GEN ] && {
-	service dnsmasq stop
-	killall -9 dnsmasq
-	wait
-	# Add the original config file
-	cat /etc/dnsmasq.conf >> $GEN
-	# Start blocking
-	dnsmasq --conf-file=$GEN && echo adb > $Running || elog "ERROR ; dnsmasq config failed"
-	# Failsafe
-	dnsmasq &>/dev/null
-	eval BlockCount=$(grep -c 'address=/' $GEN)
-	eval END=$(date +%s)
-	eval DIFF=$(($END-$START))
-	elog "Blocked $BlockCount unique host in $DIFF seconds"
-	# EXTRA 
-	[ -d $CIFS ] && echo ADBLOCK blocked $BlockCount unique host in $DIFF seconds > $CIFS/counts.txt
-	[ -d $CIFS ] && cp -f $GEN $CIFS/dnsmask.conf
-} || elog "No Updates"
 
 pexit 0
 
