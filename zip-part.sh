@@ -82,12 +82,12 @@ DL() {
 		eval LocalFile="$LocalHost"
 		if wget $url -U "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)" -O - > $TMP ; then
 		elog "S$i downloaded $url"
-		[ -d $CIFS ] && cp $TMP $LocalFile
+		[ -d $CIFS ] && cp -f $TMP $LocalFile
 		Generate
 		else
 		[ -f $LocalFile ] && {
 		elog "S$i update failed: load $LocalFile"
-		cat $LocalFile > $TMP
+		cp -f $LocalFile $TMP
 		Generate
 		} || elog "S$i failed $url"
 		fi
@@ -99,7 +99,7 @@ DL() {
 		eval LocalFile="$LocalHost"
 		[ -f $LocalFile ] && {
 			elog "Loading $LocalFile"
-			cat $LocalFile > $TMP
+			cp -f $LocalFile $TMP
 			Generate
 		}
 	done
