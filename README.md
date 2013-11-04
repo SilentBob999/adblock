@@ -30,10 +30,7 @@ Tested on :
   
   Tomato Version 1.28 by shibby
   
-  On this router I can activate all source provided (27671K) and it will survive. 
-  At the worse moment it got 14mb of free ram but once finished it settle at around 44MB of free ram. 
-  This his achieve by downloading, generating, remove duplicate and delete temp on each single source before doing the next. 
-  It can achieve all that in less than 12 minutes while any other script I test will crash with such big source.
+  Recent test show that dnsmasq do not handle a config file greater than 1-2 mb
   
  
 ## Barebones branch
