@@ -30,7 +30,14 @@ Tested on :
   
   Tomato Version 1.28 by shibby
   
-  Recent test show that dnsmasq do not handle a config file greater than 1-2 mb
+#### Fallow branche 'zip' and 'ZipTmp' for most recent advancement
+  Recent test show that dnsmasq do not handle a config file greater than a few mb on my router. 
+  It was always starting the dnsmasq in failsafe.  
+  So all the work to lower the charge while 'sorting' 10-20mb of source was useless.
+  More test to do.
+  
+  I think I will add a mixed mode (dnsmasq config / host file).
+  The utilisation of an aditionnal host file take a lot of ram and cpu however.
   
  
 ## Barebones branch
