@@ -42,7 +42,7 @@ esac
 # Remove whitelisted site from the file
 Whitelist() {
 for w in $WHITELIST; do
-sed -i -e "/\.$w/d /\/$w/d" $TMP
+sed -i -e "/\.$w/d" -e "/\/$w/d" $TMP
 done
 }
 
