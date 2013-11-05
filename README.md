@@ -30,11 +30,23 @@ Tested on :
   
   Tomato Version 1.28 by shibby
   
-  On this router I can activate all source provided (27671K) and it will survive. 
-  At the worse moment it got 14mb of free ram but once finished it settle at around 44MB of free ram. 
-  This his achieve by downloading, generating, remove duplicate and delete temp on each single source before doing the next. 
-  It can achieve all that in less than 12 minutes while any other script I test will crash with such big source.
+#### Fallow branche 'zip' and 'ZipTmp' for most recent advancement
+  Recent test show that dnsmasq do not handle a config file greater than a few mb on my router. 
+  It was always starting the dnsmasq in failsafe.  
+  So all the work to lower the charge while 'sorting' 10-20mb of source was useless.
+  More test to do.
   
+  I think I will add a mixed mode (dnsmasq config / host file).
+  The utilisation of an aditionnal host file take a lot of ram and cpu however.
+  
+  Some stat using source 1,2,3,4,7
+  48414  hosts
+  config file is 1.7M (1740k)
+  7620  12%   0% dnsmasq --conf-file=/tmp/gen
+  7612  12%   0% dnsmasq --conf-file=/cifs1/dnsmasq/gen
+  This mean that once dnsmask use the config file it need almost 5x the size of the source used. 
+  And this doesnt count RAM needed to generate the file.
+  Using Source 6 only (2.7mb) dont even load for me, so source 5 & 7 can be abandon for router use (pc no prob)
  
 ## Barebones branch
 ### Goal is to strip down below 4096 bytes limit for wan up script
@@ -141,4 +153,3 @@ Mother of All AD-BLOCKING (08 October 2013) BLOCKS Malware Spyware Bloatware by 
 http://forum.xda-developers.com/showthread.php?t=1916098
 10,528K  330,332 hosts
 ( 4 days old at the moment these line are written ) New. Got 3 update in a months
-
