@@ -3,7 +3,6 @@
 cat <<'ENDF'|gzip|openssl enc -base64
 
 alias elog='logger -t ADBLOCK -s'
-Running="/tmp/adblock" #leave in /tmp
 LocalHost="$CIFS/HOST-S\$i"
 
 [ -d $CIFS ] && TMP="$CIFS/tmp" || TMP="/tmp/tmp"
@@ -17,10 +16,12 @@ kill -0 $(cat $pidfile 2>/dev/null) &>/dev/null && {
 }
 echo $$ > $pidfile
 
+# Check if blocking
+[ "$(ps | grep -v grep | grep 'dnsmasq --conf-file=')" ] && Running="yes" || unset Running
+
 # Stop blocking.  Free RAM
 stop() {
 	elog "STOP"
-	rm "$Running" &>/dev/null
 	service dnsmasq restart &>/dev/null
 }
 
@@ -34,7 +35,7 @@ pexit() {
 case "$1" in
 	restart) stop;;
 	stop) stop; pexit 0;;
-	toggle)	[ -e "$Running" ] && { stop; pexit 0; };;
+	toggle)	[ -n "$Running" ] && { stop; pexit 0; };;
 	force) stop; force="1";;
 esac
 
@@ -146,12 +147,12 @@ done
 # Will generate or download these UpToDate source only if another source is
 # not up-to-date or if it's the first run otherwise dnsmasq do not
 # need to be restarted/configure	
-[ -n "$UpToDate" ] && ( [ -n "$DLList" -o ! -f "$Running" ] ) && DLList="$DLList $UpToDate"
-[ -n "$UpToDateLocal" ] && ( [ -n "$DLList" -o ! -f "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
+[ -n "$UpToDate" ] && ( [ -n "$DLList" -o ! -n "$Running" ] ) && DLList="$DLList $UpToDate"
+[ -n "$UpToDateLocal" ] && ( [ -n "$DLList" -o ! -n "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
 wait
 }
 
-# BEGIN
+
 eval START=$(date +%s)
 rm $GEN &>/dev/null
 cru d ADBTmpCheck &>/dev/null
@@ -167,7 +168,6 @@ cru d ADBTmpCheck &>/dev/null
 		cat /etc/dnsmasq.conf >> $GEN
 		# Start blocking
 		dnsmasq --conf-file=$GEN && {
-			echo adb > $Running
 			eval BlockCount=$(grep -c 'address=/' $GEN)
 			eval END=$(date +%s)
 			eval DIFF=$(($END-$START))
