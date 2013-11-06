@@ -34,6 +34,7 @@ echo $$ > $pidfile
 
 stop() {
 	elog "STOP"
+	unset Running
 	service dnsmasq restart &>/dev/null
 }
 
