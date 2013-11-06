@@ -42,6 +42,7 @@ echo $$ > $pidfile
 # Stop blocking.  Free RAM
 stop() {
 	elog "STOP"
+	unset Running
 	service dnsmasq restart &>/dev/null
 }
 
