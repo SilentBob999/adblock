@@ -2,55 +2,57 @@
 ## Tomato AD-Blocking script
 ## https://github.com/SilentBob999/adblock
 
-alias elog='logger -t ADBLOCK -s'
-Running="/tmp/adblock" #leave in /tmp
 
 REDIRECTIP="0.0.0.0"
 CIFS="/cifs1/dnsmasq" # adapt to your need
-LocalHost="$CIFS/HOST-S\$i"
-[ -d $CIFS ] && TMP="$CIFS/tmp" || TMP="/tmp/tmp"
-[ -d $CIFS ] && GEN="$CIFS/gen" || GEN="/tmp/gen"
 
 WHITELIST="facebook.com dropbox.com"
 
-GETS="1 2 3 4"
-S1="http://pgl.yoyo.org/as/serverlist.php?hostformat=nohtml"  #44K - 2,539 hosts
-S2="http://mirror1.malwaredomains.com/files/justdomains" #474K - 23,972 hosts
-S3="http://www.malwaredomainlist.com/hostslist/hosts.txt" #52K - 1,661 hosts
-S4="http://winhelp2002.mvps.org/hosts.txt" #560K - approx 15,350 hosts
-S5="http://hosts-file.net/download/hosts.txt" #7,873K - 246,284 hosts
-S6="http://hosts-file.net/hphosts-partial.asp" #2,719K - 77,661 hosts
-S8="http://adblock.mahakala.is/hosts" #10,528K  330,332 hosts
+## Sources
+## Warning ( ( HUGE : S5 , S8 ) ( BIG : S6 )
+GETS="1 2 3 4 7"
+S1="http://pgl.yoyo.org/as/serverlist.php?hostformat=nohtml"  ##44K - 2,539 hosts
+S2="http://mirror1.malwaredomains.com/files/justdomains" ##474K - 23,972 hosts
+S3="http://www.malwaredomainlist.com/hostslist/hosts.txt" ##52K - 1,661 hosts
+S4="http://winhelp2002.mvps.org/hosts.txt" ##560K - approx 15,350 hosts
+S7="http://someonewhocares.org/hosts/hosts" #321K - approx 10,100 hosts
+
+alias elog='logger -t ADBLOCK -s'
+LocalHost="$CIFS/HOST-S\$i"
+
+[ -d $CIFS ] && TMP="$CIFS/tmp" || TMP="/tmp/tmp"
+[ -d $CIFS ] && GEN="$CIFS/gen" || GEN="/tmp/gen"
 
 pidfile=/var/run/adblock.pid
 kill -0 $(cat $pidfile 2>/dev/null) &>/dev/null && {
-	elog "Another instance found ($pidfile), exiting!"
+	elog "Another instance found ($pidfile, $(cat $pidfile)), exiting!"
 	exit 1
 }
 echo $$ > $pidfile
 
+[ "$(ps | grep -v grep | grep 'dnsmasq --conf-file=')" ] && Running="yes" || unset Running
+
 stop() {
-	rm "$Running" &>/dev/null
 	elog "STOP"
-	service dnsmasq restart
+	service dnsmasq restart &>/dev/null
 }
 
 pexit() {
 	elog "Exiting"
-	rm $pidfile
+	rm $TMP $GEN $pidfile &>/dev/null
 	exit $@
 }
 
 case "$1" in
 	restart) stop;;
 	stop) stop; pexit 0;;
-	toggle)	[ -e "$Running" ] && { stop; pexit 0; };;
-	force) force="1";rm "$Running" &>/dev/null;;
+	toggle)	[ -n "$Running" ] && { stop; pexit 0; };;
+	force) stop; force="1";;
 esac
 
 Whitelist() {
 for w in $WHITELIST; do
-sed -i -e "/\.$w/d /\/$w/d" $TMP
+sed -i -e "/\.$w/d" -e "/\/$w/d" $TMP
 done
 }
 
@@ -70,43 +72,41 @@ s|$|/'$REDIRECTIP'|
 s|^|address=/|' $TMP
 Whitelist
 cat $TMP >> $GEN
-cat $GEN | sort -u > $TMP
+cat $GEN | sort -u > $TMP || elog "ERROR ; sort failed"
 mv -f $TMP $GEN
+wait
 }
 
 DL() {
-[ -n "$DLList" -o -n "$GenOnly" ] && stop 2>&1
+[ -n "$DLList" -o -n "$GenOnly" ] && stop
 [ -n "$DLList" ] && {
 	for i in $DLList; do
 		eval url="\$S$i"
 		eval LocalFile="$LocalHost"
-		if wget $url -U "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)" -O - > $TMP ; then
+		if wget $url -O - > $TMP ; then
 		elog "S$i downloaded $url"
-		[ -d $CIFS ] && cp $TMP $LocalFile
+		[ -d $CIFS ] && cp -f $TMP $LocalFile
 		Generate
 		else
 		[ -f $LocalFile ] && {
 		elog "S$i update failed: load $LocalFile"
-		cat $LocalFile > $TMP
+		cp -f $LocalFile $TMP
 		Generate
 		} || elog "S$i failed $url"
 		fi
-		wait
 	done
-	wait
 }
 [ -n "$GenOnly" ] && {
 	for i in $GenOnly; do
 		eval LocalFile="$LocalHost"
 		[ -f $LocalFile ] && {
 			elog "Loading $LocalFile"
-			cat $LocalFile > $TMP
+			cp -f $LocalFile $TMP
 			Generate
 		}
-		wait
 	done
-	wait
 }
+wait
 }
 
 CheckUpdate() {
@@ -130,7 +130,7 @@ nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 			elog "S$i UpToDate"
 			[ -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || UpToDate="$UpToDate $i"
 		}
-	echo "$time" >$CIFS/$LAST
+	[ -d $CIFS ] && echo "$time" >$CIFS/$LAST
 	echo "$time" >/tmp/$LAST
 	} || {
 	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || {
@@ -139,29 +139,26 @@ nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 		}
 	}
 done
-[ -n "$UpToDate" ] && ( [ -n "$DLList" -o ! -f "$Running" ] ) && DLList="$DLList $UpToDate"
-[ -n "$UpToDateLocal" ] && ( [ -n "$DLList" -o ! -f "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
+[ -n "$UpToDate" ] && ( [ -n "$DLList" -o ! -n "$Running" ] ) && DLList="$DLList $UpToDate"
+[ -n "$UpToDateLocal" ] && ( [ -n "$DLList" -o ! -n "$Running" ] ) && GenOnly="$GenOnly $UpToDateLocal"
+wait
 }
 
-eval START=$(date +%s)
-rm $GEN
+rm $GEN &>/dev/null
 CheckUpdate
 DL
-
 [ -f $GEN ] && {
-	service dnsmasq stop
-	killall -9 dnsmasq
+	service dnsmasq stop &>/dev/null
+	killall -9 dnsmasq &>/dev/null
 	wait
 	cat /etc/dnsmasq.conf >> $GEN
-	dnsmasq --conf-file=$GEN
-	dnsmasq >/dev/null 2>&1
-
-	eval BlockCount=$(grep -c 'address=/' $GEN)
-	eval END=$(date +%s)
-	eval DIFF=$(($END-$START))
-	elog "Blocked $BlockCount : $DIFF seconds"
+	dnsmasq --conf-file=$GEN && {
+		eval BlockCount=$(grep -c 'address=/' $GEN)
+		elog "Blocked $BlockCount unique host"
+		} || {
+		elog "ERROR ; not enouph RAM"
+		dnsmasq &>/dev/null && elog "failsafe ; (block nothing)"
+		}
+	wait
 } || elog "No Updates"
-
-rm $TMP $GEN
-echo Running > $Running
 pexit 0
