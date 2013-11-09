@@ -58,7 +58,6 @@ FormatHost() {
 sed -i -e "s|^|$REDIRECTIP\\t|" "$TMP"
 }
 
-# Format the file
 Generate() {
 sed -i -e '/%/d
 s/[[:cntrl:][:blank:]]//g
@@ -174,6 +173,7 @@ cru d ADBTmpCheck &>/dev/null
 			[ -f "$GENHOST" ] && BlockCount=$(( $BlockCount+$(awk 'END { print NR }' "$GENHOST")))
 			eval END=$(date +%s)
 			eval DIFF=$(($END-$START))
+			# EXTRA
 			[ -d "$CIFS" ] && echo ADBLOCK blocked $BlockCount unique host in $DIFF seconds > "$CIFS/counts.txt"
 			[ -d "$CIFS" -a -f "$GEN" ] && cp -f "$GEN" "$CIFS/dnsmask.conf"
 			[ -d "$CIFS" -a -f "$GENHOST" ] && cp -f "$GENHOST" "$CIFS/addHost.conf"
