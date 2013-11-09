@@ -105,14 +105,12 @@ s/[[:space:]]*\].*$//
 /127\.0\.0\.1/ s/^127\.0\.0\.1[ \t]*//
 /^$/d
 /[a-zA-Z0-9]\{5\}$/d' "$TMP"
-# /localhost$/d & # /localdomain$/d & # /broadcasthost$/d
-# replaced by /[a-zA-Z0-9]\{5\}$/d # That remove anything that have more than five Char at the end (dot not include)
-[ -n "$KeepAsHost" ] && [[ $KeepAsHost =~ $1 ]] && {
-	FormatHost # For host file
+[ -n "$KeepAsHost" ] && [ "$KeepAsHost" != "${KeepAsHost/$1/}"  ] && {
+	FormatHost
 	Result="$GENHOST"
 	WhitelistAll
 		} || {
-			FormatDnsmasq # For dnsmasq config
+			FormatDnsmasq
 			Result="$GEN"
 			Whitelist
 			}
