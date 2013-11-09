@@ -175,13 +175,14 @@ cru d ADBTmpCheck &>/dev/null
 			eval DIFF=$(($END-$START))
 			# EXTRA
 			[ -d "$CIFS" ] && echo ADBLOCK blocked $BlockCount unique host in $DIFF seconds > "$CIFS/counts.txt"
-			[ -d "$CIFS" -a -f "$GEN" ] && cp -f "$GEN" "$CIFS/dnsmask.conf"
-			[ -d "$CIFS" -a -f "$GENHOST" ] && cp -f "$GENHOST" "$CIFS/addHost.conf"
 			elog "Blocked $BlockCount unique host in $DIFF seconds"
 			} || {
 			elog "ERROR ; dnsmasq config ($SIZE) failed"
 			dnsmasq &>/dev/null && elog "failsafe ; load dnsmasq with default config (block nothing)" || elog "TROUBLE"
 			}
+		# EXTRA
+		[ -d "$CIFS" -a -f "$GEN" ] && cp -f "$GEN" "$CIFS/dnsmask.conf"
+		[ -d "$CIFS" -a -f "$GENHOST" ] && cp -f "$GENHOST" "$CIFS/addHost.conf"
 		wait
 	} || elog "No Updates"
 } || {
