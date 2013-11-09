@@ -68,7 +68,7 @@ s/[[:space:]]*\].*$//
 /127\.0\.0\.1/ s/^127\.0\.0\.1[ \t]*//
 /^$/d
 /[a-zA-Z0-9]\{5\}$/d' "$TMP"
-[ -n "$KeepAsHost" ] && [[ $KeepAsHost =~ $1 ]] && {
+[ -n "$KeepAsHost" ] && [ "$KeepAsHost" != "${KeepAsHost/$1/}"  ] && {
 	FormatHost
 	Result="$GENHOST"
 	WhitelistAll
