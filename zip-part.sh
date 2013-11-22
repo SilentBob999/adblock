@@ -3,11 +3,12 @@
 cat <<'ENDF'|gzip|openssl enc -base64
 
 alias elog='logger -t ADBLOCK -s'
-LocalHost="$CIFS/HOST-S\$i"
 
-[ -d "$CIFS" ] && TMP="$CIFS/tmp" || TMP="/tmp/tmp"
-[ -d "$CIFS" ] && GEN="$CIFS/gen" || GEN="/tmp/gen"
-[ -d "$CIFS" ] && GENHOST="$CIFS/genHost" || GEN="/tmp/genHost"
+[ -w "$CIFS" ] && CI="1" || unset CI
+[ -n "$CI" ] && LocalHost="$CIFS/HOST-S\$i" || unset LocalHost
+[ -n "$CI" ] && TMP="$CIFS/tmp" || TMP="/tmp/tmp"
+[ -n "$CI" ] && GEN="$CIFS/gen" || GEN="/tmp/gen"
+[ -n "$CI" ] && GENHOST="$CIFS/genHost" || GENHOST="/tmp/genHost"
 
 pidfile=/var/run/adblock.pid
 kill -0 $(cat $pidfile 2>/dev/null) &>/dev/null && {
@@ -78,8 +79,8 @@ s/[[:space:]]*\].*$//
 			Whitelist
 			}
 [ ! -f "$Result" ] && echo "" > "$Result"
-if [ -d "$CIFS" ]; then sort -o "$TMP" -T "$CIFS" "$TMP" && sort -m -u -o "$Result" -T "$CIFS" "$TMP" "$Result" || elog "ERROR ; sort failed"
-else sort -o "$TMP" "$TMP" && sort -m -u -o "$Result" "$TMP" "$Result" || elog "ERROR ; sort failed"; fi
+if [ -n "$CI" ]; then sort -o "$TMP" -T "$CIFS" "$TMP" && sort -m -u -o "$Result" -T "$CIFS" "$TMP" "$Result" || elog "ERROR ; sort 1 failed"
+else sort -o "$TMP" "$TMP" && sort -m -u -o "$Result" "$TMP" "$Result" || elog "ERROR ; sort 2 failed"; fi
 rm "$TMP" &>/dev/null
 wait
 }
@@ -92,7 +93,7 @@ DL() {
 		eval LocalFile="$LocalHost"
 		if wget $url -O - > $TMP || wget $url -U "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)" -O - > $TMP ; then
 		elog "S$i downloaded $url"
-		[ -d "$CIFS" ] && cp -f "$TMP" "$LocalFile"
+		[ -n "$CI" ] && cp -f "$TMP" "$LocalFile"
 		Generate $i
 		else
 		[ -f "$LocalFile" ] && {
@@ -124,7 +125,7 @@ eval LocalFile="$LocalHost"
 eval url="\$S$i"
 unset LASTF time
 [ -f "/tmp/$LAST" ] && LASTF="/tmp/$LAST"
-[ -f "$CIFS/$LAST" ] && LASTF="$CIFS/$LAST"
+[ -n "$CI" ] && [ -f "$CIFS/$LAST" ] && LASTF="$CIFS/$LAST"
 P1=$(echo $url| sed 's|^http[s]*://[^/]*\(/.*\)$|\1|')
 H1=$(echo $url| sed 's|^http[s]*://\([^/]*\)/.*$|\1|')
 time=$(echo -e "HEAD $P1 HTTP/1.1\r\nHost: $H1\r\nConnection: close\r\n"|
@@ -137,7 +138,7 @@ nc -w 5 $H1 80|grep -i Last-Modified:|tr -d "\r")
 			elog "S$i UpToDate"
 			[ -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || UpToDate="$UpToDate $i"
 		}
-	[ -d "$CIFS" ] && echo "$time" >"$CIFS/$LAST"
+	[ -n "$CI" ] && echo "$time" >"$CIFS/$LAST"
 	echo "$time" >"/tmp/$LAST"
 	} || {
 	[ "$(eval "echo \${S$i}")" == "" -a -f "$LocalFile" ] && UpToDateLocal="$UpToDateLocal $i" || {
@@ -155,7 +156,7 @@ wait
 eval START=$(date +%s)
 rm "$GEN" &>/dev/null
 cru d ADBTmpCheck &>/dev/null
-[ "$CIFSRequire" == "N" -o -d "$CIFS" ] && {
+[ "$CIFSRequire" == "N" -o -n "$CI" ] && {
 	CheckUpdate
 	DL
 	[ -f "$GEN" -o -f "$GENHOST" ] && {
@@ -174,15 +175,15 @@ cru d ADBTmpCheck &>/dev/null
 			eval END=$(date +%s)
 			eval DIFF=$(($END-$START))
 			# EXTRA
-			[ -d "$CIFS" ] && echo ADBLOCK blocked $BlockCount unique host in $DIFF seconds > "$CIFS/counts.txt"
+			[ -n "$CI" ] && echo ADBLOCK blocked $BlockCount unique host in $DIFF seconds > "$CIFS/counts.txt"
 			elog "Blocked $BlockCount unique host in $DIFF seconds"
 			} || {
 			elog "ERROR ; dnsmasq config ($SIZE) failed"
 			dnsmasq &>/dev/null && elog "failsafe ; load dnsmasq with default config (block nothing)" || elog "TROUBLE"
 			}
 		# EXTRA
-		[ -d "$CIFS" -a -f "$GEN" ] && cp -f "$GEN" "$CIFS/dnsmask.conf"
-		[ -d "$CIFS" -a -f "$GENHOST" ] && cp -f "$GENHOST" "$CIFS/addHost.conf"
+		[ -n "$CI" -a -f "$GEN" ] && cp -f "$GEN" "$CIFS/dnsmask.conf"
+		[ -n "$CI" -a -f "$GENHOST" ] && cp -f "$GENHOST" "$CIFS/addHost.conf"
 		wait
 	} || elog "No Updates"
 } || {
