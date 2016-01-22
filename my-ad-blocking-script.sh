@@ -96,8 +96,8 @@ done
 }
 
 FormatDnsmasq() {
-sed -i -e '/^www[0-9]\./ s/^www[0-9]\.//
-/^www\./ s/^www\.//
+sed -i -e '/^www[0-9]\..*\./ s/^www[0-9]\.//
+/^www\..*\./ s/^www\.//
 s|$|/'$REDIRECTIP'|
 s|^|address=/|' "$TMP"
 }
