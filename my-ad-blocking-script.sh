@@ -10,7 +10,7 @@ WHITELIST="facebook.com dropbox.com"
 
 ## Sources
 ## Warning ( ( HUGE : S5 , S8 ) ( BIG : S6 ) CIFSRequire to "Y"
-GETS="1 2 3 4 7" # List all source you want here
+GETS="1 2 3 4 5 9 10 11 12 15 16 17 18" # List all source you want here
 KeepAsHost="" # Listed here will be merge together in 1 single host (used as "addn-hosts=") 
 
 # Source that are in GETS but are not listed in KeepAsHost will be formated an use directly in the dnsmasq config.
@@ -18,14 +18,25 @@ KeepAsHost="" # Listed here will be merge together in 1 single host (used as "ad
 # DNSmasq block domain wide, so every www. entry are removed and duplicate cleaned give smaller file.
 # Host file seems to use less RAM or at least it is more tolerant to start the service but may crash after a while.
 
-S1="http://pgl.yoyo.org/as/serverlist.php?hostformat=nohtml"  ##44K - 2,539 hosts
-S2="http://mirror1.malwaredomains.com/files/justdomains" ##474K - 23,972 hosts
-S3="http://www.malwaredomainlist.com/hostslist/hosts.txt" ##52K - 1,661 hosts
-S4="http://winhelp2002.mvps.org/hosts.txt" ##560K - approx 15,350 hosts
-S5="http://hosts-file.net/download/hosts.txt" #7,873K - 246,284 hosts
-S6="http://hosts-file.net/hphosts-partial.asp" #2,719K - 77,661 hosts
-S7="http://someonewhocares.org/hosts/hosts" #321K - approx 10,100 hosts
-S8="http://adblock.mahakala.is/hosts" ##10,528K  330,332 hosts
+S1="http://pgl.yoyo.org/as/serverlist.php?hostformat=nohtml"  ## 44K - 2,539 hosts
+S2="http://mirror1.malwaredomains.com/files/justdomains" ## 474K - 23,972 hosts
+S3="http://www.malwaredomainlist.com/hostslist/hosts.txt" ## 52K - 1,661 hosts
+S4="http://winhelp2002.mvps.org/hosts.txt" ## 560K - approx 15,350 hosts
+S5="http://someonewhocares.org/hosts/hosts" ## 321K - approx 10,100 hosts
+S6="http://adblock.mahakala.is/hosts" ## 10528K  330,332 hosts - may block web functionnality
+S7="http://hosts-file.net/download/hosts.txt" ## 7873K - 246,284 hosts - may block web functionnality
+S8="http://hosts-file.net/hphosts-partial.asp" ## 2719K - 77,661 hosts - may block web functionnality
+S9="http://hosts-file.net/ad_servers.txt" ## 1753K   46,817 hosts - Ad/Tracking site
+S10="http://hosts-file.net/emd.txt" ## 3719K - 115,661 hosts - Malware site
+S11="http://hosts-file.net/exp.txt" ## 666K - 17,212 hosts - Exploit site
+S12="http://hosts-file.net/fsa.txt" ## 2456K - 70,486 hosts - Fraud site
+S13="http://hosts-file.net/grm.txt" ## 17K - 550 hosts - Spam involved site
+S14="http://hosts-file.net/hfs.txt" ## 18K - 571 hosts - Site spaming the hphost server
+S15="http://hosts-file.net/hjk.txt" ## 3K - 87 hosts - Hijack site
+S16="http://hosts-file.net/mmt.txt" ## 170K - 5,514 hosts - Misleading marketing site
+S17="http://hosts-file.net/pha.txt" ## 679K - 18,390 hosts - Illegal Pharmacy site
+S18="http://hosts-file.net/psh.txt" ## 2384K - 71,284 hosts - Phishing site
+S19="http://hosts-file.net/wrz.txt" ## 91K - 3,232 hosts - Warez/piracy site
 
 
 alias elog='logger -t ADBLOCK -s'
