@@ -84,7 +84,7 @@ Whitelist() {
 # Remove only listed domain.  eg; whitelist "facebook" will remove nothing.
 # eg; whitelist "facebook.com"  will remove ad.facebook.com and facebook.com but will continue to block, facebook.ca, fakefacebook.com, etc..
 for w in $WHITELIST; do
-sed -i -e "/\.$w/d" -e "/\/$w/d" "$TMP"
+sed -i -e "/\.$w\//d" -e "/\/$w\//d" "$TMP"
 done
 }
 WhitelistAll(){ 
